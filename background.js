@@ -1,4 +1,5 @@
 var black_list = {};
+var mTabRequest = {};
 
 function getHostFromUrl(url){
     var arrUrl = url.split("//");
@@ -8,14 +9,6 @@ function getHostFromUrl(url){
 　　　　var start = arrUrl[1].indexOf("/");
 　　　　var relUrl = arrUrl[1].substring(0,start);
 　　　　return relUrl;
-}
-
-function addRequstToList(request){
-    var host = getHostFromUrl(request.url);
-    if(request_list[host] == null){
-        request_list[host] = [];
-    }
-    request_list[host].push(request.url);    
 }
 
 function addUrlToBlockList(url){
@@ -61,28 +54,7 @@ chrome.storage.local.get(["black_list"],function(result){
 });
 
 
-chrome.contextMenus.create(
-    {
-        title:"列表",
-        type:"normal",
-        contexts:["page"],
-        onclick:function(info,tab){
-            alert(tab.index);
-        }
-    }
-    ,function(){
-
-    }
-);
-
-var request_list = {};
-//var hosts = {};
-//var adbHosts = [];
-
-var mTabRequest = {};
-
 chrome.tabs.onUpdated.addListener(function(tabId,changeInfo,tab){
-    //console.log("onUpdated..." + tabId + ", status = " + changeInfo.status);
     if(changeInfo.status == 'loading'){
         mTabRequest[tabId] = [];
     }else if(changeInfo.status == 'complete'){
@@ -93,29 +65,24 @@ chrome.tabs.onUpdated.addListener(function(tabId,changeInfo,tab){
 
 });
 
-// 监听发送请求
+
 chrome.webRequest.onBeforeRequest.addListener(
 
     function(details) {
         var host = getHostFromUrl(details.url);
-        //console.log("=== " + host + ", has = " + adbHosts.indexOf(host));
         if(black_list[host] != undefined && black_list[host].block){
             console.log("屏蔽 " + host);
             black_list[host].count +=1;
             return {cancel:true};
         }
-        //console.log(details);
         return {cancel:false};
     },
     {urls: ["<all_urls>"],types: ["script"]},
-  //要执行的操作，这里配置为阻断
   ["blocking"]
 );
 
-
+// 
 chrome.webRequest.onCompleted.addListener(function(request){
-    //addRequstToList(request);
-    //console.log("onCompleted " + request.tabId + ", url = " + request.url);
     if(mTabRequest[request.tabId] == undefined){
         mTabRequest[request.tabId] = [];
     }

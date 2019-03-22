@@ -21,7 +21,6 @@ chrome.tabs.query(
                 var url = this.getAttribute("url");
                 console.log("click url = " + url);
                 bg.addUrlToBlockList(url);
-//                console.log("click " + list[x] + ". this = " + this.getAttribute("url"));
             };
             
             p.appendChild(block);
