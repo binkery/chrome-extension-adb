@@ -1,5 +1,25 @@
-var message = document.getElementById("message");
+var mDivRequestList = document.getElementById("div_request_list");
 var bg = chrome.extension.getBackgroundPage();
+
+function appendToDiv(item){
+    var p = document.createElement('p');
+
+    var hostSpan = document.createElement('span');
+    hostSpan.innerHTML = item.url;
+    p.appendChild(hostSpan);
+
+    var blockSpan = document.createElement('span');
+    blockSpan.innerHTML = '屏蔽';
+    blockSpan.setAttribute("url",item.url);
+    blockSpan.onclick = function(){
+        var url = this.getAttribute("url");
+        console.log("click url = " + url);
+        bg.addUrlToBlockList(url);
+    };
+    p.appendChild(blockSpan);
+
+    mDivRequestList.appendChild(p);
+}
 
 chrome.tabs.query(
     {
@@ -8,24 +28,9 @@ chrome.tabs.query(
         console.log("query " + tabs[0].id);
         var list = bg.mTabRequest[tabs[0].id];
         for(x in list){
-            var p = document.createElement('p');
-
-            var host = document.createElement('span');
-            host.innerHTML = list[x];
-            p.appendChild(host);
-
-            var block = document.createElement('span');
-            block.innerHTML = '屏蔽';
-            block.setAttribute("url",list[x]);
-            block.onclick = function(){
-                var url = this.getAttribute("url");
-                console.log("click url = " + url);
-                bg.addUrlToBlockList(url);
-            };
-            
-            p.appendChild(block);
-
-            message.appendChild(p);
+            appendToDiv({
+                url : list[x],
+            });
         }
     }
 );

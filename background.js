@@ -1,4 +1,5 @@
-var black_list = {};
+// 
+var mBlockList = {};
 var mTabRequest = {};
 
 function getHostFromUrl(url){
@@ -14,17 +15,17 @@ function getHostFromUrl(url){
 function addUrlToBlockList(url){
     console.log("add url to block list " + url);
     var host = getHostFromUrl(url);
-    console.log("add url to block list " + host + ", " + black_list[host]);
-    if(black_list[host] == undefined){
+    console.log("add url to block list " + host + ", " + mBlockList[host]);
+    if(mBlockList[host] == undefined){
         //console.log("add url to block list " + black_list[host].block);
-        black_list[host] = {
+        mBlockList[host] = {
             count:0,
             block:true
         };
     } else {
-        black_list[host].block = true;
+        mBlockList[host].block = true;
     }
-    chrome.storage.local.set({"black_list":black_list},function(){
+    chrome.storage.local.set({"block_list":mBlockList},function(){
         console.log("addUrlToBlockList save ");
     });
     
@@ -32,23 +33,23 @@ function addUrlToBlockList(url){
 
 function removeHostFromBlockList(host){
     console.log("removeHostFromBlockList " + host);
-    if(black_list[host] == undefined){
+    if(mBlockList[host] == undefined){
 
     } else {
-        black_list[host].block = false;
+        mBlockList[host].block = false;
 
     }
-    console.log("removeHostFromBlockList " + black_list[host].block);
-    chrome.storage.local.set({"black_list":black_list},function(){
+    console.log("removeHostFromBlockList " + mBlockList[host].block);
+    chrome.storage.local.set({"block_list":mBlockList},function(){
         console.log("removeHostFromBlockList save ");
     });
 }
 
-chrome.storage.local.get(["black_list"],function(result){
-    if(result.black_list == undefined){
-        black_list = {};
+chrome.storage.local.get(["block_list"],function(result){
+    if(result.block_list == undefined){
+        mBlockList = {};
     }else{
-        black_list = result.black_list;
+        mBlockList = result.block_list;
         
     }
 });
@@ -58,8 +59,8 @@ chrome.tabs.onUpdated.addListener(function(tabId,changeInfo,tab){
     if(changeInfo.status == 'loading'){
         mTabRequest[tabId] = [];
     }else if(changeInfo.status == 'complete'){
-        chrome.storage.local.set({"black_list":black_list},function(){
-            console.log("removeHostFromBlockList save ");
+        chrome.storage.local.set({"block_list":mBlockList},function(){
+            console.log("onUpdated save ");
         });
     }
 
@@ -70,15 +71,15 @@ chrome.webRequest.onBeforeRequest.addListener(
 
     function(details) {
         var host = getHostFromUrl(details.url);
-        if(black_list[host] != undefined && black_list[host].block){
+        if(mBlockList[host] != undefined && mBlockList[host].block){
             console.log("屏蔽 " + host);
-            black_list[host].count +=1;
+            mBlockList[host].count +=1;
             return {cancel:true};
         }
         return {cancel:false};
     },
     {urls: ["<all_urls>"],types: ["script"]},
-  ["blocking"]
+    ["blocking"]
 );
 
 // 

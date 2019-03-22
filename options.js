@@ -1,41 +1,29 @@
-chrome.storage.local.get(["black_list"],function(result){
-    console.log("get local data");
-    if(result.black_list == undefined){
-        black_list = [];
-    }else{
-        black_list = result.black_list;
-    }
-    //updateList(result.black_list);
-});
 var bg = chrome.extension.getBackgroundPage();
+var mDivBlockList = document.getElementById("block_list");
 
-console.log("options js running.");
-var message = document.getElementById("black_list");
-function updateList(list){
-    console.log("append list " + list);
-    //for(var x = 0 , len = list.length ;x < len;x++){
-    for(var x in list){
-    console.log("x === " + x + ", " + list[x].block);
+var list = bg.mBlockList;
+
+function appendToDiv(item){
+
     var p = document.createElement('p');
-    var host = document.createElement('span');
-    host.innerHTML = x;
-    p.appendChild(host);
 
+    var hostSpan = document.createElement('span');
+    hostSpan.innerHTML = item.host;
+    p.appendChild(hostSpan);
 
-        var countSpan = document.createElement('span');
-            countSpan.innerHTML = list[x].count;
-            p.appendChild(countSpan);
+    var countSpan = document.createElement('span');
+    countSpan.innerHTML = item.count;
+    p.appendChild(countSpan);
 
-    var block = document.createElement('span');
-    if(list[x].block){
-        block.innerHTML = '不屏蔽';
+    var blockSpan = document.createElement('span');
+    if(item.block){
+        blockSpan.innerHTML = '不屏蔽';
     }else{
-        block.innerHTML = '屏蔽';
+        blockSpan.innerHTML = '屏蔽';
     }
-    block.setAttribute("block",list[x].block);
-    block.setAttribute("url",x);
-    block.onclick = function(){
-        //block_url(list[x]);
+    blockSpan.setAttribute("block",item.block);
+    blockSpan.setAttribute("url",item.host);
+    blockSpan.onclick = function(){
         var url = this.getAttribute("url");
         var isBlock = this.getAttribute("block");
         console.log(isBlock);
@@ -48,12 +36,17 @@ function updateList(list){
         }
         console.log("click url = " + url);
     };
-    p.appendChild(block);
+    p.appendChild(blockSpan);
 
-    message.appendChild(p);
-
-    }
+    mDivBlockList.appendChild(p);
 }
 
-updateList(bg.black_list);
+for(var x in list){
+    appendToDiv({
+        host:x,
+        count:list[x].count,
+        block:list[x].block
+    });
+}
+
 
